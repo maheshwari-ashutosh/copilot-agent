@@ -1,5 +1,5 @@
 // Main client export
-export { CopilotClient } from './client/index.js';
+export { CopilotClient, type StreamResponseChunk } from './client/index.js';
 
 // Session management
 export { SessionManager } from './session/index.js';

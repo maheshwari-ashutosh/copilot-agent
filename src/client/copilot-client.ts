@@ -4,8 +4,17 @@ import type { SessionInfo, SessionListOptions } from '../session/types.js';
 import { buildCliArgs, validateConfig } from '../config/config-builder.js';
 import { CommandExecutor, type ICommandExecutor } from '../executor/command-executor.js';
 import { parseCliOutput } from '../executor/output-parser.js';
+import { executeCommandStream, type StreamChunk } from '../executor/stream-executor.js';
 import { SessionManager } from '../session/session-manager.js';
 import { CopilotExecutionError, ConfigurationError } from '../errors/errors.js';
+
+/**
+ * Streaming response chunk
+ */
+export interface StreamResponseChunk {
+    type: 'content' | 'error';
+    content: string;
+}
 
 /**
  * Client for interacting with the GitHub Copilot CLI
@@ -85,6 +94,40 @@ export class CopilotClient {
             codeChanges: parsed.codeChanges,
             exitCode: result.exitCode,
         };
+    }
+
+    /**
+     * Execute a prompt and stream the response in real-time
+     *
+     * @param text - The prompt to send to Copilot
+     * @yields StreamResponseChunk - Chunks of response as they arrive
+     *
+     * @example
+     * ```typescript
+     * for await (const chunk of client.promptStream('Explain this code')) {
+     *   process.stdout.write(chunk.content);
+     * }
+     * ```
+     */
+    async *promptStream(text: string): AsyncGenerator<StreamResponseChunk, void, unknown> {
+        const args = buildCliArgs(this.config, text);
+
+        const stream = executeCommandStream(args, {
+            cwd: this.config.cwd,
+            timeout: this.config.timeout,
+        });
+
+        for await (const chunk of stream) {
+            if (chunk.type === 'stdout') {
+                yield { type: 'content', content: chunk.data };
+            } else if (chunk.type === 'stderr') {
+                yield { type: 'error', content: chunk.data };
+            }
+        }
+
+        // Update last session ID after streaming completes
+        const recentSession = await this.sessionManager.getMostRecentSession();
+        this.lastSessionId = recentSession?.id ?? null;
     }
 
     /**

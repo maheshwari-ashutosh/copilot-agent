@@ -1,1 +1,1 @@
-export { CopilotClient } from './copilot-client.js';
+export { CopilotClient, type StreamResponseChunk } from './copilot-client.js';
