@@ -1,0 +1,31 @@
+{
+  "name": "langchain-copilot",
+  "version": "0.1.0",
+  "description": "LangChain chat model provider for GitHub Copilot CLI via copilot-agent",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.0",
+    "ajv": "^8.17.1",
+    "copilot-agent": "workspace:*",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,163 +1,96 @@
-# generic-copilot-agent
+# copilot-agent
 
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+TypeScript SDK for programmatic access to the GitHub Copilot CLI. It provides a clean, typed interface for prompt execution, streaming, session management, and usage metrics.
 
-**A robust, type-safe TypeScript library for programmatic interaction with the GitHub Copilot CLI.**
+## Features
 
-This library provides a high-level abstraction over the GitHub Copilot CLI, enabling developers to integrate AI-powered coding assistance directly into their Node.js applications and tools. It supports comprehensive session management, real-time streaming responses, and granular permission control.
+- Simple prompt execution with typed responses.
+- Streaming responses via async iterators.
+- Session discovery and resume support.
+- Fine-grained permission flags mapped to the Copilot CLI.
+- Multi-model selection via `CopilotModel`.
 
-## 🚀 Features
+## Requirements
 
-- **Programmatic Control**: Execute Copilot prompts directly from your TypeScript/JavaScript code.
-- **Session Management**: Seamlessly create, list, resume, and manage Copilot sessions to maintain conversational context.
-- **Real-time Streaming**: Consume AI responses incrementally as they are generated using async iterators.
-- **Type Safety**: Fully typed configuration, responses, and events for a top-tier developer experience.
-- **Granular Permissions**: Fine-grained control over file access, tool execution, and network permissions.
-- **Multi-Model Support**: easy selection of various AI models (GPT-5, Claude 3.5 Sonnet, etc.).
+- Node.js >= 18
+- GitHub Copilot CLI installed and authenticated
 
-## 📦 Installation
-
-Ensure you have the [GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli/installing-github-copilot-in-the-cli) installed and authenticated on your machine.
+## Install
 
 ```bash
-npm install generic-copilot-agent
-# or
-yarn add generic-copilot-agent
-# or
-pnpm add generic-copilot-agent
+pnpm add copilot-agent
 ```
 
-## 🛠️ Usage
+## Basic Usage
 
-### Basic Prompt execution
+```ts
+import { CopilotClient, CopilotModel } from "copilot-agent";
 
-Execute a simple prompt and receive the full response once complete.
+const client = new CopilotClient({
+  model: CopilotModel.GPT_5_MINI,
+  allowAll: true
+});
 
-```typescript
-import { CopilotClient, CopilotModel } from 'generic-copilot-agent';
+const response = await client.prompt("Generate a binary search function in TypeScript.");
 
-async function main() {
-  const client = new CopilotClient({
-    model: CopilotModel.GPT_5_MINI,
-    allowAll: true, // Caution: Enables all permissions
-  });
-
-  try {
-    const response = await client.prompt('Generate a binary search function in TypeScript');
-    
-    console.log(response.output);
-    console.log(`Session ID: ${response.sessionId}`);
-    console.log(`Tokens used: ${response.usage.inputTokens} in / ${response.usage.outputTokens} out`);
-  } catch (error) {
-    console.error('Execution failed:', error);
-  }
-}
-
-main();
+console.log(response.output);
+console.log(`Session ID: ${response.sessionId}`);
+console.log(`Tokens: ${response.usage.inputTokens} in / ${response.usage.outputTokens} out`);
 ```
 
-### Real-time Streaming
+## Streaming
 
-Process the response chunk-by-chunk for a responsive user experience.
-
-```typescript
-import { CopilotClient } from 'generic-copilot-agent';
+```ts
+import { CopilotClient } from "copilot-agent";
 
 const client = new CopilotClient();
 
-for await (const chunk of client.promptStream('Explain quantum computing like I am 5')) {
-  if (chunk.type === 'content') {
+for await (const chunk of client.promptStream("Explain quantum computing like I am 5")) {
+  if (chunk.type === "content") {
     process.stdout.write(chunk.content);
-  } else if (chunk.type === 'error') {
+  } else {
     console.error(chunk.content);
   }
 }
-
-// Access session context after stream completion
-const sessionId = client.getLastSessionId();
 ```
 
-### Session Management
+## Session Management
 
-Maintain context across multiple interactions by resuming sessions.
-
-```typescript
-// 1. List available sessions
+```ts
 const recentSessions = await CopilotClient.listSessions({ limit: 5 });
 const lastSession = recentSessions[0];
 
 if (lastSession) {
-  // 2. Resume a specific session
   const client = new CopilotClient({
     sessionId: lastSession.id,
-    allowAll: true,
+    allowAll: true
   });
 
-  // The model retains context from previous interactions
-  await client.prompt('Refactor the previous code to be functional style');
+  await client.prompt("Refactor the previous code to be functional style.");
 }
 ```
 
-## ⚙️ Configuration
-
-The `CopilotClient` constructor accepts a configuration object to tailor behavior:
+## Configuration
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `model` | `CopilotModel` \| `string` | `default` | The AI model to use (e.g., `gpt-5-mini`, `claude-sonnet-4.5`). |
-| `sessionId` | `string` | `undefined` | ID of a session to resume. |
-| `allowAll` | `boolean` | `false` | Enable all permissions (tools, paths, URLs). Equivalent to `--yolo`. |
-| `cwd` | `string` | `process.cwd()` | Working directory for the execution. |
-| `timeout` | `number` | `300000` | Execution timeout in milliseconds (default 5 mins). |
-| `allowedTools` | `string[]` | `[]` | Whitelist specific tools (e.g., `['shell(git:*)']`). |
-| `deniedTools` | `string[]` | `[]` | Blacklist specific tools. |
+| `model` | `CopilotModel` \| `string` | `default` | Model to use (e.g., `gpt-5-mini`, `claude-sonnet-4.5`). |
+| `sessionId` | `string` | `undefined` | Session to resume. |
+| `continueLastSession` | `boolean` | `false` | Resume the most recent session. |
+| `allowAll` | `boolean` | `false` | Enable all permissions (tools, paths, URLs). |
+| `cwd` | `string` | `process.cwd()` | Working directory. |
+| `timeout` | `number` | `300000` | Execution timeout in ms. |
+| `allowedTools` | `string[]` | `[]` | Whitelist tools. |
+| `deniedTools` | `string[]` | `[]` | Blacklist tools. |
 | `silent` | `boolean` | `false` | Suppress non-essential output. |
 
-## 📚 API Reference
+## API Summary
 
-### `CopilotClient`
+- `CopilotClient.prompt(text: string): Promise<CopilotResponse>`
+- `CopilotClient.promptStream(text: string): AsyncGenerator<StreamResponseChunk>`
+- `CopilotClient.getLastSessionId(): string | null`
+- `CopilotClient.listSessions(options): Promise<SessionInfo[]>`
 
-- **`prompt(text: string): Promise<CopilotResponse>`**: Executes a single prompt.
-- **`promptStream(text: string): AsyncGenerator<StreamResponseChunk>`**: Streams response chunks.
-- **`getLastSessionId(): string | null`**: Returns the ID of the last active session.
-- **`static listSessions(options): Promise<SessionInfo[]>`**: Lists locally saved sessions.
-- **`static getMostRecentSession(): Promise<SessionInfo | null>`**: Helper to find the last session.
+## License
 
-### `CopilotResponse`
-
-```typescript
-interface CopilotResponse {
-  output: string;
-  sessionId: string;
-  usage: {
-    inputTokens: number;
-    outputTokens: number;
-    model: string;
-    // ...
-  };
-  duration: {
-    apiSeconds: number;
-    wallSeconds: number;
-  };
-  codeChanges: {
-    linesAdded: number;
-    linesRemoved: number;
-  };
-  exitCode: number;
-}
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT

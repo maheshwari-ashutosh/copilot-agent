@@ -1,15 +1,17 @@
 # copilot-agent monorepo
 
-A pnpm-based monorepo containing the Copilot CLI wrapper library and related assets.
+Professional TypeScript packages for programmatic access to the GitHub Copilot CLI, plus a LangChain provider built on top.
 
-## Contents
+## Packages
 
-- `packages/copilot-agent`: TypeScript library that wraps the GitHub Copilot CLI.
+- `packages/copilot-agent`: Core CLI wrapper with session management, streaming, and usage parsing.
+- `packages/langchain-copilot`: LangChain `BaseChatModel` provider with tool calling and structured output.
 
 ## Requirements
 
 - Node.js >= 18
 - pnpm
+- GitHub Copilot CLI (installed and authenticated)
 
 ## Quick Start
 
@@ -19,15 +21,14 @@ pnpm -r build
 pnpm -r test
 ```
 
-## Common Scripts
+## Workspace Commands
 
-All scripts run across packages via pnpm recursive mode:
+- `pnpm -r build` - build all packages
+- `pnpm -r test` - run tests across the workspace
+- `pnpm -r test:watch` - watch mode for tests
+- `pnpm -r test:coverage` - coverage reports
 
-- `pnpm -r build`
-- `pnpm -r test`
-- `pnpm -r test:watch`
-- `pnpm -r test:coverage`
+## Documentation
 
-## Package Details
-
-For library usage, configuration, and API reference, see `packages/copilot-agent/README.md`.
+- `packages/copilot-agent/README.md` - core API and configuration
+- `packages/langchain-copilot/README.md` - LangChain integration and examples
