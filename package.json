@@ -1,47 +1,13 @@
 {
-  "name": "copilot-agent",
-  "version": "1.0.0",
-  "description": "TypeScript library for programmatic access to GitHub Copilot CLI",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
+  "name": "copilot-agent-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "tsc",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "prepublishOnly": "npm run build"
-  },
-  "keywords": [
-    "copilot",
-    "github",
-    "ai",
-    "cli",
-    "sdk"
-  ],
-  "author": "",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "@types/node": "^25.0.10",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.6",
-    "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "yaml": "^2.8.2"
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm -r test:watch",
+    "test:coverage": "pnpm -r test:coverage"
   }
 }

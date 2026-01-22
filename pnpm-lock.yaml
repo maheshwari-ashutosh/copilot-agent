@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  packages/copilot-agent:
     dependencies:
       yaml:
         specifier: ^2.8.2
